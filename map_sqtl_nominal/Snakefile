@@ -1,0 +1,196 @@
+
+
+from pathlib import Path
+import glob
+import subprocess as sp
+# shell.prefix("set +o pipefail;")
+
+
+cov_dir=config['cov_dir']
+sqtl_output_dir=config['sqtl_output_dir']
+window_name=config['window_name']
+vcf=config['vcf']
+qtltools_binary=config['qtltools_binary']
+seed=config['seed']
+window=config['window']
+prepared_sqtl_input_dir=config['prepared_sqtl_input_dir']
+
+conds=config['conds'].split(' ')
+PCs=config['PCs'].split(' ')
+num_chunks=config['chunks']
+
+tss_f=config['tss_f']
+
+sample_size_f=config['sample_size_f']
+maf_f=config['maf_f']
+total_chunks=num_chunks
+
+# num_chunks=2
+# conds=['CIL_24']
+# PCs=['5']
+
+chunks=[i for i in range(1,num_chunks+1)]
+
+#RULES
+# localrules: indexChunks, map_introns_tss
+rule all:
+    input:
+        expand(sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.idx",zip,cond=conds,PC=PCs),expand(sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.leadsnp",zip,cond=conds,PC=PCs),expand(expand(sqtl_output_dir+"{{cond}}/chunk_"+window_name+"_{{cond}}_{{PC}}_PCs.{current_chunk}.output.tab.sorted.gz.tbi",current_chunk=chunks), zip, cond=conds,PC=PCs),expand(sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.tss",zip,cond=conds,PC=PCs)
+        # expand(expand(sqtl_output_dir+"{{cond}}/chunk_"+window_name+"_{{cond}}_{{PC}}_PCs.{current_chunk}.output.tab.sorted",current_chunk=chunks),zip,cond=conds,PC=PCs)
+rule mapSqtl:
+    input:
+        cov=cov_dir+"{cond}_{PC}_PCs.cov",qq_file=prepared_sqtl_input_dir+'{cond}/{cond}_perind.counts.gz.qqnorm_chrALL_annotated_sorted_renamed_chr.gz'
+    output:
+        out=sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.txt",log=sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.log"
+    params:
+        vcf=vcf,
+        qtltools_binary=qtltools_binary,
+        num_chunks=total_chunks,
+        seed=seed,
+        window=window
+    resources:
+        mem_mb=32000
+    shell:
+        "{params.qtltools_binary} cis --normal --vcf {params.vcf} --cov {input.cov} --bed {input.qq_file} --out {output.out} --log {output.log} --nominal 1 --window {params.window} --grp-best --chunk {wildcards.current_chunk} {params.num_chunks} --seed {params.seed} --std-err"
+
+rule sortChunks:
+    input:
+        sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.txt"
+    output:
+        sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted"
+    resources:
+        mem_mb=32000
+    run:
+        import pandas as pd
+        dat=pd.read_csv(input[0],sep=' ',header=None)
+        dat['_chr_num']=dat[10].str.slice(3).astype(int)
+        dat.sort_values(by=['_chr_num',11,12]).drop(columns=['_chr_num']).to_csv(output[0],sep='\t',header=False,index=False)
+
+rule add_MAF_N_to_chunks:
+    input:
+        sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted"
+    output:
+        sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted.maf"
+    params:
+        sample_size_f=sample_size_f,
+        maf_f=maf_f
+    resources:
+        mem_mb=32000
+
+    run:
+        import pandas as pd
+        chunk_dat=pd.read_csv(input[0],sep='\t',header=None)
+
+        #Loading MAF data and renaming the column names to match the rsid column in QTLtools output (with --grp-best option).
+        maf_dat=pd.read_csv(params['maf_f'],sep='\t',header=None).loc[:,[2,5]].rename(columns={2: 9, 5: 'maf'})
+        sample_size_dat=pd.read_csv(params['sample_size_f'],sep='\t',header=None)
+        N=sample_size_dat.loc[sample_size_dat[0]==wildcards['cond'],1].tolist()[0]
+
+        #Add N and MAF
+        chunk_dat=chunk_dat.merge(maf_dat,how='left',on=[9]).drop_duplicates(subset=[0,5,9])
+        chunk_dat[18]=N
+
+        #Reordering columns
+        all_cols_ordered=[i for i in range(19)]+['maf']
+        chunk_dat=chunk_dat.loc[:,all_cols_ordered]
+
+        #Saving data
+        chunk_dat.to_csv(output[0],sep='\t',header=False, index=False)
+
+rule tabixChunks:
+    input:
+        sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted.maf"
+    output:
+        gzip_f=sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted.gz",tbi_f=sqtl_output_dir+"{cond}/chunk_"+window_name+"_{cond}_{PC}_PCs.{current_chunk}.output.tab.sorted.gz.tbi"
+    resources:
+        mem_mb=32000
+    shell:
+        "bgzip -c {input} > {output.gzip_f}; tabix -0 -s 11 -b 12 -e 13 -f {output.gzip_f};"
+
+rule map_introns_tss:
+    input:
+        sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.idx"
+    output:
+        sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.tss"
+    params:
+        chunks=chunks,
+        sqtl_output_dir=sqtl_output_dir,
+        tss_f=tss_f
+    resources:
+        mem_mb=64000
+    run:
+        import pandas as pd
+        gene_tss_dat=pd.read_csv(params.tss_f,sep='\t',header=None)
+        gene_tss_dat.columns=gene_tss_dat.columns.astype(str)
+
+        intron_list_dat=pd.read_csv(input[0],sep='\t',header=None,usecols=[0])
+        intron_list_dat.columns=intron_list_dat.columns.astype(str)
+
+        #Split gene|intron into gene and intron
+        intron_list_dat[['gene','intron']]=intron_list_dat['0'].str.split('|',expand=True)
+
+        #Merging with TSS data
+        intron_list_dat=intron_list_dat.merge(gene_tss_dat,how='left',left_on='gene',right_on='0')
+
+        #Reformatting gene|intron
+        intron_list_dat['0']=intron_list_dat['gene']+'|'+intron_list_dat['intron']
+        output_dat=intron_list_dat.loc[:,['0','1']]
+
+        output_dat.to_csv(output[0],sep='\t',index=False,header=False)
+
+
+rule indexChunks:
+    input:
+        expand(sqtl_output_dir+"{{cond}}/chunk_"+window_name+"_{{cond}}_{{PC}}_PCs.{current_chunk}.output.tab.sorted.gz",current_chunk=chunks)
+    output:
+        sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.idx"
+    params:
+        chunks=chunks,
+        sqtl_output_dir=sqtl_output_dir
+    resources:
+        mem_mb=32000
+    run:
+        import pandas as pd
+        chunks_index_dat=pd.DataFrame()
+        for i,chunk in enumerate(params.chunks):
+            dat=pd.read_csv(input[i],sep='\t',header=None)
+            gene_intron_pairs_dat=dat[[0,5]].drop_duplicates()
+
+
+            gene_intron_pairs_dat[0]=dat[0]+"|"+dat[5]
+
+            gene_intron_pairs_dat[1]=input[i]
+            gene_intron_pairs_dat=gene_intron_pairs_dat.loc[:,[0,1]]
+            chunks_index_dat=chunks_index_dat.append(gene_intron_pairs_dat,ignore_index=True)
+            # print(chunks_index_dat.loc[chunks_index_dat[0].isna(),:].to_csv(sep='\t'))
+
+            print('Finished chunk: {0}...'.format(chunk))
+        chunks_index_dat.to_csv(output[0],sep='\t',header=False,index=False)
+
+
+rule leadSqtlSNP:
+    input:
+        expand(sqtl_output_dir+"{{cond}}/chunk_"+window_name+"_{{cond}}_{{PC}}_PCs.{current_chunk}.output.tab.sorted.gz",current_chunk=chunks)
+    output:
+        sqtl_output_dir+"{cond}/"+window_name+"_{cond}_{PC}_PCs.output.leadsnp"
+    params:
+        chunks=chunks,
+        sqtl_output_dir=sqtl_output_dir
+    resources:
+        mem_mb=64000
+    run:
+        import pandas as pd
+        chunks_index_dat=pd.DataFrame()
+        all_leadsnp_dat=pd.DataFrame()
+        for i,chunk in enumerate(params.chunks):
+            dat=pd.read_csv(input[i],sep='\t',header=None)
+            dat[0]=dat[0]+"|"+dat[5]
+            #Getting min P-value SNP
+            idx=dat.groupby([0])[13].transform(min) == dat[13]
+            #
+            leadsnp_dat=dat[idx]
+            leadsnp_dat[0]=(leadsnp_dat[0].str.split('|',expand=True))[0]
+
+            all_leadsnp_dat=all_leadsnp_dat.append(leadsnp_dat,ignore_index=True)
+            print('Finished chunk: {0}...'.format(chunk))
+        all_leadsnp_dat.to_csv(output[0],sep='\t',header=False,index=False)
