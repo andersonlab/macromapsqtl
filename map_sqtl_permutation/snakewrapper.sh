@@ -1,5 +1,5 @@
 
-set -e
+
 source /nfs/team152/oe2/sqtl/scripts/paths.sh;
 source /nfs/team152/oe2/sqtl/scripts/configs.sh;
 source /nfs/team152/oe2/sqtl/scripts/funcs.sh;

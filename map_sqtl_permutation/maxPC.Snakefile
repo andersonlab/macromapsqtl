@@ -3,7 +3,6 @@
 
 from pathlib import Path
 import glob
-shell.prefix("set +o pipefail;")
 
 
 cov_dir=config['cov_dir']
