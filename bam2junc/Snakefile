@@ -1,0 +1,41 @@
+from pathlib import Path
+import glob
+
+
+
+BAM_COND_MASK=[]
+ALL_BAMS=[]
+
+for cond in config['conds']:
+
+    cond_bams=[Path(bam).stem.split('.')[0] for bam in glob.glob(config['realigned_bam_dir']+cond+"/*.bam")]
+
+
+    ALL_BAMS+=cond_bams
+    for bam in cond_bams:
+        BAM_COND_MASK.append(cond)
+
+
+
+
+
+
+
+rule all:
+    input:
+        expand(config['junc_dir']+"{cond}/{sample}.junc",zip,cond=BAM_COND_MASK,sample=ALL_BAMS)
+
+rule bam2junc:
+    input:
+        config['realigned_bam_dir']+'{cond}/{sample}.Aligned.sortedByCoord.waspFiltered.out.bam'
+    output:
+        config['junc_dir']+"{cond}/{sample}.junc"
+    params:
+        min_intron_length=50,
+        anchor_length=8,
+        max_intron_length=500000
+
+    resources:
+        mem_mb=3000
+    shell:
+        "regtools junctions extract -s 0 -a {params.anchor_length} -m {params.min_intron_length} -M {params.max_intron_length} {input} -o {output}"
