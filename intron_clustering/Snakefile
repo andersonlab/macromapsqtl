@@ -1,0 +1,38 @@
+from pathlib import Path
+import glob
+
+ratios_to_float_script=config['ratios_to_float_script']
+
+
+
+rule all:
+    input:
+        expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind_numers.counts.gz",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_float_meaniur_medianiur_nonzerosamples_medianclucoverage",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_cluentropy",cond=config['conds'])
+
+rule intron_clustering:
+    input:
+        config['junc_lists_dir']+"{cond}_junc.list"
+    output:
+        config['intron_clustering_output_dir']+"{cond}/{cond}_perind_numers.counts.gz"
+    params:
+        min_intron_splitreads=50,
+        max_intron_length=500000,
+        intron_clustering_script=config['intron_clustering_script'],
+        output_dir=lambda wildcards: config['intron_clustering_output_dir']+wildcards.cond+"/"
+
+    resources:
+        mem_mb=8000
+    shell:
+        "python {params.intron_clustering_script} -j {input} -m {params.min_intron_splitreads} -l {params.max_intron_length} -o {wildcards.cond} -r {params.output_dir}"
+rule ratios_to_float:
+    input:
+        config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed"
+    output:
+        config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_float_meaniur_medianiur_nonzerosamples_medianclucoverage",config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_cluentropy"
+    resources:
+        mem_mb=32000
+    params:
+        ratios_to_float_script=ratios_to_float_script,
+        output_prefix=config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed"
+    shell:
+        "Rscript {params.ratios_to_float_script} {input} {params.output_prefix}"
