@@ -1,0 +1,78 @@
+from pathlib import Path
+import glob
+
+
+BAM_COND_MASK=[]
+ALL_BAMS=[]
+
+for cond in config['conds']:
+
+    cond_bams=[Path(bam).stem for bam in glob.glob(config['unaligned_bam_dir']+cond+"/*.bam")]
+
+
+
+
+    ALL_BAMS+=cond_bams
+    for bam in cond_bams:
+        BAM_COND_MASK.append(cond)
+
+
+
+
+
+
+
+rule all:
+    input:
+        expand(config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.waspFiltered.out.bam.bai",zip,cond=BAM_COND_MASK,sample=ALL_BAMS)
+
+
+rule indexBam:
+    input:
+        config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.waspFiltered.out.bam"
+    output:
+        config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.waspFiltered.out.bam.bai"
+    resources:
+        mem_mb=4000
+    shell:
+        "samtools index {input} {output}"
+
+
+rule waspFilterBam:
+    input:
+        config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.out.bam"
+    output:
+        config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.waspFiltered.out.bam"
+    resources:
+        mem_mb=4000
+    shell:
+        "samtools view -S -b -e \"[vW]!=2 && [vW]!=3 && [vW]!=4 && [vW]!=5 && [vW]!=6 && [vW]!=7\" {input} > {output}"
+
+#This is very efficient as it loads the same VCF file for each BAM file
+rule mapFastq:
+    input:
+        read1=config['output_base_dir']+"fastq/{cond}/{sample}.1.fq",
+        read2=config['output_base_dir']+"fastq/{cond}/{sample}.2.fq"
+    output:
+        output_f=temp(config['output_base_dir']+"realignedBam/{cond}/{sample}.Aligned.sortedByCoord.out.bam")
+    resources:
+        mem_mb=50000
+    threads: 10
+    params:
+        star_params = "--twopassMode Basic --outSAMstrandField intronMotif --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes All --outFilterMismatchNoverReadLmax 0.04 --outSAMmultNmax 1 --limitBAMsortRAM 40000000000 --sjdbOverhang 74 --waspOutputMode SAMtag",
+        star_index = config['star_index'],
+        vcf=config['vcf'],
+        output_dir=config['output_base_dir']
+    shell:
+        "STAR --runThreadN {threads} {params.star_params} --varVCFfile <(zcat {params.vcf}) --genomeDir {params.star_index} --readFilesIn {input.read1} {input.read2} --outFileNamePrefix {params.output_dir}realignedBam/{wildcards.cond}/{wildcards.sample}."
+
+rule bam2fastq:
+    input:
+        config['unaligned_bam_dir']+"{cond}/{sample}.bam"
+    output:
+        read1=temp(config['output_base_dir']+"fastq/{cond}/{sample}.1.fq"),
+        read2=temp(config['output_base_dir']+"fastq/{cond}/{sample}.2.fq")
+    resources:
+        mem_mb=4000
+    shell:
+        "samtools collate -u -O {input} | samtools fastq -1 {output.read1} -2 {output.read2} -0 /dev/null -s /dev/null -n"
