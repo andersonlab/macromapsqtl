@@ -16,6 +16,7 @@ JUNC_DIR="$OUTPUT_DIR"junc/
 JOB_LOGS_DIR="$OUTPUT_DIR"job_logs/
 
 #Subdirectories of $DATA_DIR
+UNALIGNED_BAMS_DIR=/lustre/scratch123/hgi/teams/anderson/projects/MacroMap/Bams/
 BAM_DIR="$DATA_DIR"bam/
 REALIGNED_BAM_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/realignedBam/
 
