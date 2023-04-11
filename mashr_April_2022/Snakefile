@@ -1,0 +1,257 @@
+
+
+from pathlib import Path
+import glob
+import subprocess as sp
+import pandas as pd
+import numpy as np
+# shell.prefix("set +o pipefail;")
+
+conds=config['conds'].split()
+PCs=config['PCs'].split()
+sqtl_output_dir=config['sqtl_output_dir']
+mash_scripts_dir=config['mash_scripts_dir']
+mash_output_dir=config['mash_output_dir']
+target_sample=config['samples_per_chunk']
+num_chunks=int(config['chunks'])
+seed=config['seed']
+permutation_sqtl_output_dir=config['permutation_sqtl_output_dir']
+
+sample_effects_cond="Ctrl_24"
+sample_effects_PC="6"
+
+
+chunks=[str(i+1) for i in range(int(num_chunks))]
+
+
+###DEBUG###
+# conds=['Ctrl_6']
+# PCs=['7']
+######
+localrules: collect_allconds_summstats_strong,collect_allchunks_summstats_strong
+
+#RULES
+wildcard_constraints:
+	chunk=r"|".join(set(chunks)),
+	cond=r"|".join(set(conds)),
+	PC=r"|".join(set(PCs))
+
+rule all:
+	input:
+		mash_output_dir+"summstats/strong.all.txt",mash_output_dir+"summstats/random.all.txt"
+
+#Finding gene/intron pairs that are present across all conditions
+rule get_common_introns:
+	input:
+		expand(sqtl_output_dir+"{cond}/1mb_{cond}_{PC}_PCs.output.idx",zip,cond=conds,PC=PCs)
+	output:
+		mash_output_dir+'allowed_introns.txt'
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	resources:
+		mem_mb=8000
+	shell:
+		"python {params.mash_scripts_dir}get_common_introns.py \"{input}\" {output}"
+
+#Getting a set of RANDOM effects
+rule get_effects_random:
+	input:
+		summstat_f=sqtl_output_dir+sample_effects_cond+"/chunk_1mb_"+sample_effects_cond+"_"+sample_effects_PC+"_PCs.{chunk}.output.tab.sorted.gz",allowed_introns_f=mash_output_dir+'allowed_introns.txt'
+	output:
+		mash_output_dir+"effect_lists/random_chunk_{chunk}.txt"
+	params:
+		mash_scripts_dir=mash_scripts_dir,
+		target_sample=target_sample,
+		seed=seed
+	resources:
+		mem_mb=64000
+	shell:
+		"python {params.mash_scripts_dir}random_subset.py {input.summstat_f} {input.allowed_introns_f} {params.target_sample} {params.seed} {output}"
+rule get_summstats_random:
+	input:
+		effect_f=mash_output_dir+"effect_lists/random_chunk_{chunk}.txt",idx_f=sqtl_output_dir+"{cond}/1mb_{cond}_{PC}_PCs.output.idx"
+	output:
+		mash_output_dir+"summstats/random_chunk_{chunk}.{cond}.{PC}_PCs.txt"
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	resources:
+		mem_mb=64000
+	shell:
+		"python {params.mash_scripts_dir}get_summstats.py {input.effect_f} {input.idx_f} {output}"
+rule collect_allchunks_summstats_random:
+	input:
+		expand(mash_output_dir+"summstats/random_chunk_{chunk}.{{cond}}.{{PC}}_PCs.txt",chunk=chunks)
+	output:
+		mash_output_dir+"summstats/random.{cond}.{PC}_PCs.txt"
+	resources:
+		mem_mb=64000
+	shell:
+		"cat {input} > {output}"
+
+#TODO separate processing from collection as it takes time to process serially
+rule collect_allconds_summstats_random:
+	input:
+		expand(mash_output_dir+"summstats/random.{cond}.{PC}_PCs.txt",zip,cond=conds,PC=PCs)
+	output:
+		mash_output_dir+"summstats/random.all.txt"
+	resources:
+		mem_mb=64000
+
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	shell:
+		"python {params.mash_scripts_dir}collect_cond_summstats.py \"{input}\" {output}"
+
+#Getting a set of STRONG effects
+rule get_effects_strong:
+	input:
+		summstat_f=sqtl_output_dir+"{cond}/chunk_1mb_{cond}_{PC}_PCs.{chunk}.output.tab.sorted.gz",allowed_introns_f=mash_output_dir+'allowed_introns.txt'
+	output:
+		mash_output_dir+"effect_lists/strong_chunk_{chunk}_{cond}_{PC}_PCs.txt"
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	resources:
+		mem_mb=64000
+	run:
+		import pandas as pd
+
+		snp_col=9
+		gene_col=0
+		intron_col=5
+		pval_col=13
+
+		allowed_introns_f=input['allowed_introns_f']
+		summstat_f=input['summstat_f']
+
+		allowed_introns_list=(pd.read_csv(allowed_introns_f,sep='\t',header=None))[0].tolist()
+		summstat_dat=pd.read_csv(summstat_f,sep='\t',header=None)
+
+		#Formatting gene/intron column
+		summstat_dat['gene_intron']=summstat_dat[0]+"|"+summstat_dat[5]
+		summstat_dat['gene_intron']=(summstat_dat['gene_intron'].str.split(':',expand=True)).loc[:,0:2].agg(':'.join,axis=1)
+
+		#Filtering for only allowed introns
+		intron_summstat_file_dat=summstat_dat.loc[summstat_dat['gene_intron'].isin(allowed_introns_list),:]
+
+		#Grouping by gene/intron and choosing top SNP
+		intron_summstat_file_dat['min_pval']=intron_summstat_file_dat.groupby(['gene_intron'])[pval_col].transform('min')
+
+		min_effects=intron_summstat_file_dat.loc[intron_summstat_file_dat[pval_col]==intron_summstat_file_dat['min_pval'],:]
+
+		#Dropping duplicate rows that match the min P-value (gene/intron duplicates) and choosing only gene/intron/snp/pval columns
+		min_effects=min_effects.drop_duplicates(subset=['gene_intron'])
+		min_effects=min_effects.loc[:,['gene_intron',snp_col,pval_col]]
+
+		#Saving list
+		min_effects.to_csv(output[0],sep='\t',header=False,index=False)
+rule collect_allchunks_effects_list_strong:
+	input:
+		expand(mash_output_dir+"effect_lists/strong_chunk_{chunk}_{{cond}}_{{PC}}_PCs.txt",chunk=chunks)
+	output:
+		mash_output_dir+"effect_lists/strong_{cond}_{PC}_PCs.txt"
+	resources:
+		mem_mb=16000
+	shell:
+		"cat {input} | awk 'BEGIN{{FS=\"\\t\"}}{{print $1\"\\t\"$2\"\\t\"$3\"\\t{wildcards.cond}\"}}' > {output}"
+rule aggregate_allconds_effects_list_strong:
+	input:
+		expand(mash_output_dir+"effect_lists/strong_{cond}_{PC}_PCs.txt",zip,cond=conds,PC=PCs)
+	output:
+		mash_output_dir+"effect_lists/strong.txt"
+	resources:
+		mem_mb=8000
+	run:
+		import pandas as pd
+
+		intron_col=0
+		pval_col=2
+		all_dat=pd.DataFrame()
+		for f in input:
+			dat=pd.read_csv(f,sep='\t',header=None)
+			all_dat=all_dat.append(dat,ignore_index=True)
+
+		all_dat['min_pval']=all_dat.groupby(intron_col)[pval_col].transform('min')
+
+		min_effect_dat=all_dat.loc[all_dat['min_pval']==all_dat[pval_col],:]
+		min_effect_dat=min_effect_dat.drop_duplicates(subset=[intron_col])
+		min_effect_dat.to_csv(output[0],sep='\t',header=False,index=False)
+rule split_effects_list_strong:
+	input:
+		all_strong_f=mash_output_dir+"effect_lists/strong.txt",idx_f=sqtl_output_dir+"{cond}/1mb_{cond}_{PC}_PCs.output.idx"
+	output:
+		expand(mash_output_dir+"effect_lists/strong_split_chunk_{chunk}_{{cond}}_{{PC}}_PCs.txt",chunk=chunks)
+	params:
+		conds=conds,
+		PCs=PCs,
+		chunks=chunks,
+		sqtl_output_dir=sqtl_output_dir
+	resources:
+		mem_mb=8000
+	run:
+		import pandas as pd
+		import itertools
+
+
+
+		splits=[ (wildcards.cond,wildcards.PC,x) for x in chunks]
+
+		idx_dat=pd.read_csv(input['idx_f'],sep='\t',header=None)
+		effect_dat=pd.read_csv(input['all_strong_f'],sep='\t',header=None)
+		idx_dat[0]=(idx_dat[0].str.split(':',expand=True)).loc[:,0:2].agg(':'.join,axis=True)
+		lookup_dat=effect_dat.merge(idx_dat,how='left',left_on=[0],right_on=[0],suffixes=['_eff','_idx'])
+
+		for i,split in enumerate(splits):
+			output_f=output[i]
+			cond,PC,chunk=split
+			f=params['sqtl_output_dir']+cond+"/chunk_1mb_"+cond+"_"+PC+"_PCs."+chunk+".output.tab.sorted.gz"
+			chunked_eff=lookup_dat.loc[lookup_dat['1_idx']==f,[0,'1_eff']]
+			chunked_eff.to_csv(output_f,sep='\t',header=False,index=False)
+rule get_summstats_strong:
+	input:
+		effect_f=mash_output_dir+"effect_lists/strong_split_chunk_{chunk}_{cond}_{PC}_PCs.txt",idx_f=sqtl_output_dir+"{cond}/1mb_{cond}_{PC}_PCs.output.idx"
+	output:
+		mash_output_dir+"summstats/strong_chunk_{chunk}.{cond}.{PC}_PCs.txt"
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	resources:
+		mem_mb=32000
+	# threads: 2
+	shell:
+		"python {params.mash_scripts_dir}get_summstats.py {input.effect_f} {input.idx_f} {output}"
+
+#TODO separate processing from collection as it takes time to process serially
+rule collect_allchunks_summstats_strong:
+	input:
+		expand(mash_output_dir+"summstats/strong_chunk_{chunk}.{{cond}}.{{PC}}_PCs.txt",chunk=chunks)
+	output:
+		mash_output_dir+"summstats/strong.{cond}.{PC}_PCs.txt"
+	resources:
+		mem_mb=8000
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	shell:
+		"python {params.mash_scripts_dir}collect_cond_summstats.py \"{input}\" {output}"
+rule collect_allconds_summstats_strong:
+	input:
+		expand(mash_output_dir+"summstats/strong.{cond}.{PC}_PCs.txt",zip,cond=conds,PC=PCs)
+	output:
+		mash_output_dir+"summstats/strong.all.txt"
+	resources:
+		mem_mb=8000
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	shell:
+		"cat {input} > {output}"
+
+#Model fittings
+rule fit_basic_model:
+	input:
+		strong_summstat_f=mash_output_dir+"summstats/strong.all.txt",random_summstat_f=mash_output_dir+"summstats/random.all.txt"
+	output:
+		mash_output_dir+"models/basic_model.Rds"
+	resources:
+		mem_mb=128000
+	params:
+		mash_scripts_dir=mash_scripts_dir
+	shell:
+		'Rscript {params.mash_scripts_dir}fit_basic_model.R {input.random_summstat_f} {input.strong_summstat_f} {output}'
