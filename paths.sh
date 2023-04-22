@@ -65,7 +65,7 @@ MISC_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/misc/
 SAMPLE_SIZE_FILE="$MISC_OUTPUT_DIR"power.conditions.txt
 GENCODE_EXONS_FILE="$MISC_OUTPUT_DIR"exons.gencode.v27.annotation.gtf.gz
 GTF_TO_EXONS_SCRIPT="$LEAFCUTTER_SCRIPTS_DIR"leafcutter/scripts/gtf_to_exons.R
-GENCODE_GTF_FILE=/lustre/scratch119/realdata/mdt3/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf.gz
+GENCODE_GTF_FILE=/lustre/scratch126/humgen/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf.gz
 SORTED_GENCODE_GTF_FILE=/lustre/scratch119/realdata/mdt3/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf_sorted.gtf.gz
 
 CLUSTER_TO_GENE_MAP="$MISC_OUTPUT_DIR"cluster_to_gene_map.txt
