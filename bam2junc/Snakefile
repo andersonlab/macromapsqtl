@@ -2,6 +2,9 @@ from pathlib import Path
 import glob
 
 
+gtf_latest_version_f=config['gtf_latest_version_f']
+gtf_f=config['gtf_f']
+ref_genome=config['ref_genome']
 
 BAM_COND_MASK=[]
 ALL_BAMS=[]
@@ -23,7 +26,7 @@ for cond in config['conds']:
 
 rule all:
     input:
-        expand(config['junc_dir']+"{cond}/{sample}.junc",zip,cond=BAM_COND_MASK,sample=ALL_BAMS)
+        expand(config['junc_dir']+"{cond}/{sample}.annot",zip,cond=BAM_COND_MASK,sample=ALL_BAMS),expand(config['junc_dir']+"{cond}/{sample}_v45.annot",zip,cond=BAM_COND_MASK,sample=ALL_BAMS)
 
 rule bam2junc:
     input:
@@ -39,3 +42,17 @@ rule bam2junc:
         mem_mb=3000
     shell:
         "regtools junctions extract -s 0 -a {params.anchor_length} -m {params.min_intron_length} -M {params.max_intron_length} {input} -o {output}"
+
+rule junc_annot:
+    input:
+        config['junc_dir']+"{cond}/{sample}.junc"
+    output:
+        config['junc_dir']+"{cond}/{sample}.annot"
+    params:
+        gtf_f=gtf_f,
+        ref_genome=ref_genome
+
+    resources:
+        mem_mb=3000
+    shell:
+        "regtools junctions annotate {input} {params.ref_genome} {params.gtf_f} -o {output}"

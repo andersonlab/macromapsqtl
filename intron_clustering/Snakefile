@@ -7,7 +7,7 @@ ratios_to_float_script=config['ratios_to_float_script']
 
 rule all:
     input:
-        expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind_numers.counts.gz",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_float_meaniur_medianiur_nonzerosamples_medianclucoverage",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_cluentropy",cond=config['conds'])
+        expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind_numers.counts.gz",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_float_meaniur_medianiur_nonzerosamples_medianclucoverage",cond=config['conds']),expand(config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_cluentropy",cond=config['conds']),expand(        config['intron_clustering_output_dir']+"{cond}/{cond}.meaniur_medianiur_nonzerosamples_medianclucoverage",cond=config['conds'])
 
 rule intron_clustering:
     input:
@@ -36,3 +36,17 @@ rule ratios_to_float:
         output_prefix=config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed"
     shell:
         "Rscript {params.ratios_to_float_script} {input} {params.output_prefix}"
+
+rule summstats_only:
+    input:
+        config['intron_clustering_output_dir']+"{cond}/{cond}_perind.counts_renamed_float_meaniur_medianiur_nonzerosamples_medianclucoverage"
+    output:
+        config['intron_clustering_output_dir']+"{cond}/{cond}.meaniur_medianiur_nonzerosamples_medianclucoverage"
+
+    resources:
+        mem_mb=32000
+    run:
+        import pandas as pd
+        dat=pd.read_csv(input[0],sep='\t')
+        output_dat=dat.loc[:,['intron','mean_iur','median_iur','nonzero_samples','median_cluster_coverage']]
+        output_dat.to_csv(output[0],sep='\t',index=False)

@@ -66,7 +66,12 @@ SAMPLE_SIZE_FILE="$MISC_OUTPUT_DIR"power.conditions.txt
 GENCODE_EXONS_FILE="$MISC_OUTPUT_DIR"exons.gencode.v27.annotation.gtf.gz
 GTF_TO_EXONS_SCRIPT="$LEAFCUTTER_SCRIPTS_DIR"leafcutter/scripts/gtf_to_exons.R
 GENCODE_GTF_FILE=/lustre/scratch126/humgen/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf.gz
+GENCODE_GTF_FILE_UNCOMPRESSED=/lustre/scratch126/humgen/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf
+GENCODE_V45_GTF_FILE_UNCOMPRESSED=/lustre/scratch123/hgi/projects/macromapsqtl/oe2/output/ref/gencode_v45/gencode.v45.chr_patch_hapl_scaff.annotation.gtf
 SORTED_GENCODE_GTF_FILE=/lustre/scratch119/realdata/mdt3/teams/gaffney/np12/MacroMap/Annotation/gencode/gencode.v27.annotation.gtf_sorted.gtf.gz
+REF_GENOME_FILE=/lustre/scratch126/humgen/teams/gaffney/np12/MacroMap/Annotation/GRCh38.primary_assembly.genome.fa
+REF_GENOME_FILE=/lustre/scratch123/hgi/projects/macromapsqtl/oe2/output/ref/GCF_000001405.40/GCF_000001405.40_GRCh38.p14_genomic.fna
+REF_GENOME_FILE=/lustre/scratch125/humgen/resources/ref/Homo_sapiens/GRCh38_15/Homo_sapiens.GRCh38_15.fa
 
 CLUSTER_TO_GENE_MAP="$MISC_OUTPUT_DIR"cluster_to_gene_map.txt
 INTRON_TO_CLUSTER_TO_GENE_MAP="$MISC_OUTPUT_DIR"intron_to_cluster_to_gene_map.bed.gz
@@ -141,6 +146,7 @@ GWAS_DOWNLOADED_SUMMSTAT_BASEDIR=/nfs/users/nfs_n/np12/myscratch/MacroMap/Data/G
 GWAS_PROCESSED_SUMMSTAT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/gwas/
 TMP_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/tmp/
 MACROMAP_COLOC_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/macromap_coloc/
+MACROMAP_EQTL_COLOC_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/macromap_coloc_eqtl/
 GTEX_COLOC_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/gtex_coloc/
 ALL_MACROMAP_COLOC_FILE="$MACROMAP_COLOC_OUTPUT_DIR"all.coloc
 ALL_GTEX_COLOC_FILE="$GTEX_COLOC_OUTPUT_DIR"all.coloc
@@ -153,7 +159,15 @@ GENCODE_V26_GTF_FILE="$MISC_OUTPUT_DIR"gencode.v26.annotation.gtf.gz
 GENCODE_V26_GENEID_FILE="$MISC_OUTPUT_DIR"gencode.v26.annotation_chr_pos_strand_geneid_gene_name.gtf
 GENCODE_V26_TSS_FILE="$MISC_OUTPUT_DIR"gencode_v26.gene_tss.txt
 GTEX_SAMPLE_DATA_FILE="$MISC_OUTPUT_DIR"gtex_sample_data.txt
+EQTL_GTEX_SUMMSTAT_DIR=/lustre/scratch125/humgen/resources/GTEx/AnalysisV8/GTEx_processed/
+EQTL_GTEX_PROCESSED_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/eqtl_gtex_summstat/
+GTEX_EQTL_COLOC_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/gtex_coloc_eqtl/
+
 
 #EQTL
 EQTL_SUMMSTAT_DIR=/nfs/users/nfs_n/np12/myscratch/MacroMap/Analysis/eQTLs/Macromap_fds/analysis/eQTLs_per_TSS/1MB/nominal/
 EQTL_PROCESSED_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/eqtl_nominal/
+
+#SNAKEMAKE UTILS
+SNAKEMAKE_STATUS_SCRIPT="${SCRIPTS_DIR}"snakemake_utils/snakemake_status.py
+RSCRIPT4_PATH="export R_LIBS_USER=/software/team152/oe2/R/x86_64-pc-linux-gnu-library/4.1.0;/software/R-4.1.0/bin/Rscript"

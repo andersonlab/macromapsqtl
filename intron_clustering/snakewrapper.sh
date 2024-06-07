@@ -23,7 +23,7 @@ workdir="$OUTPUT_DIR_SCRATCH123"oe2/intron_clustering_workdir/
 # done;
 
 mkdir -p "$workdir"
-snakemake -j 25 -p --config conds="${conds_py}" ratios_to_float_script="${ratios_to_float_script}" intron_clustering_script="${intron_clustering_script}" junc_lists_dir="${junc_lists_dir}" intron_clustering_output_dir="${intron_clustering_output_dir}" --directory "${workdir}" --cluster "mkdir -p logs/cluster/{rule}; bsub -R \"rusage[mem={resources.mem_mb}] select[mem>{resources.mem_mb}] span[hosts=1]\" -M {resources.mem_mb} -m \"modern_hardware\" -n {threads} -J \"{rule}.{wildcards}\" -G ${group} -o logs/cluster/{rule}/{rule}.{wildcards}.out -e logs/cluster/{rule}/{rule}.{wildcards}.err"
+snakemake -j 25 -p --until all --config conds="${conds_py}" ratios_to_float_script="${ratios_to_float_script}" intron_clustering_script="${intron_clustering_script}" junc_lists_dir="${junc_lists_dir}" intron_clustering_output_dir="${intron_clustering_output_dir}" --directory "${workdir}" --cluster "mkdir -p logs/cluster/{rule}; rm logs/cluster/{rule}/{rule}.{wildcards}.out; rm logs/cluster/{rule}/{rule}.{wildcards}.err; bsub -R \"rusage[mem={resources.mem_mb}] select[mem>{resources.mem_mb}] span[hosts=1]\" -M {resources.mem_mb} -n {threads} -J \"{rule}.{wildcards}\" -G ${group} -o logs/cluster/{rule}/{rule}.{wildcards}.out -e logs/cluster/{rule}/{rule}.{wildcards}.err" -s Snakefile
 
 
 #bsub -I -R"rusage[mem=2000] select[mem>2000]" -n25 -M 2000 -m "modern_hardware" -q long
