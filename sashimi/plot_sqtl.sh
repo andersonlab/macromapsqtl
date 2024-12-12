@@ -26,7 +26,7 @@ check_command "bcftools"
 ##########Checking command-line arguments#############
 ######################################################
 # Check if the required number of arguments is provided
-if [ "$#" -lt 13 ]; then
+if [ "$#" -lt 15 ]; then
   echo "Error: Missing arguments."
   echo "Usage: $0 <num_bins> <ylim_max> <scale_line_height> <gene> <chr> <s> <e> <snp> <clus> <gte_map> <rnaseq_bam_prefix> <rnaseq_bam_suffix> <output_dir>"
   exit 1
@@ -42,7 +42,7 @@ s="$6"
 e="$7"
 snp="$8"
 snp_pos="$9"
-$vcf_input_file="$10"
+$vcf_input_file="${10}"
 clus=("${11}")
 gte_map="${12}"
 rnaseq_bam_prefix="${13}"
