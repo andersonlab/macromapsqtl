@@ -9,6 +9,8 @@ These scripts build on some utility tools:
 
  - [`pygenometracks`](https://github.com/deeptools/pyGenomeTracks) 
  - [`bedGraphToBigWig`](https://www.encodeproject.org/software/bedgraphtobigwig/)
+ - [`samtools`](https://www.htslib.org/)
+ - [`bcftools`](https://samtools.github.io/bcftools/bcftools.html)
  
 
 You should ensure that these tools are installed and are available in the `$PATH` environment variable. 
@@ -23,6 +25,8 @@ Our pipeline consists of three steps which are written in a combination of `bash
  2. Averaging coverage and intron usage ratios within each genotype group using `merge_bams.sh`. This will compute mean coverage within a pre-defined window across all RNA-seq samples that have a similar genotype with regards to the query SNP. Currently, you also need to provide a tab-separated file `${GTE_MAP}` which specifies the mapping between genotype sample IDs and RNA-seq sample IDs. Unfortunately, this is currently required even if the sample names are consistent.
 
  
+
+
 
 
 
