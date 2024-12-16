@@ -109,7 +109,7 @@ VCF=/lustre/scratch126/humgen/teams/gaffney/np12/MacroMap/Data/Genotypes/vcf_hip
 SQTL_PERMUTATION_SCRIPTS_DIR="$SCRIPTS_DIR"map_sqtl_permutation/
 SQTL_NOMINAL_SCRIPTS_DIR="$SCRIPTS_DIR"map_sqtl_nominal/
 
-QTLTOOLS_BINARY="LD_PRELOAD=/software/hgi/installs/anaconda3/envs/hgi_base/lib/libgsl.so.25.0.0 /software/hgi/installs/qtltools/bin/QTLtools"
+QTLTOOLS_BINARY="QTLtools"
 # SQTL_PERMUTATION_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH119"sqtl_permutation_output_May_2021/
 SQTL_PERMUTATION_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH123"oe2/output/sqtl_permutation_output_July_2021/
 # SQTL_NOMINAL_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH119"sqtl_nominal_output_July_2021/
