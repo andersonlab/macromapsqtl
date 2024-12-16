@@ -28,7 +28,7 @@ rule umap_inner:
     resources:
         mem_mb=32000
     shell:
-        "conda deactivate; Rscript /nfs/team152/oe2/sqtl/scripts/umap/umap_embedding.R {input} {output}"
+        "Rscript /nfs/team152/oe2/sqtl/scripts/umap/umap_embedding.R {input} {output}"
 rule umap_outer:
     input:
         umap_output_dir+"all_cond_outer.qnorm.rb_int.cov_corrected.txt"
@@ -37,7 +37,7 @@ rule umap_outer:
     resources:
         mem_mb=32000
     shell:
-        "conda deactivate; Rscript /nfs/team152/oe2/sqtl/scripts/umap/umap_embedding.R {input} {output}"
+        "Rscript /nfs/team152/oe2/sqtl/scripts/umap/umap_embedding.R {input} {output}"
 
 
 
@@ -49,7 +49,7 @@ rule correct_cov_inner:
     resources:
         mem_mb=32000
     shell:
-        "conda deactivate; Rscript /nfs/team152/oe2/sqtl/scripts/umap/normalize.R {input} {output}"
+        "Rscript /nfs/team152/oe2/sqtl/scripts/umap/normalize.R {input} {output}"
 
 rule correct_cov_outer:
     input:
@@ -59,7 +59,7 @@ rule correct_cov_outer:
     resources:
         mem_mb=32000
     shell:
-        "conda deactivate; Rscript /nfs/team152/oe2/sqtl/scripts/umap/normalize.R {input} {output}"
+        "Rscript /nfs/team152/oe2/sqtl/scripts/umap/normalize.R {input} {output}"
 
 
 rule mergeConds:
