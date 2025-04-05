@@ -17,8 +17,8 @@ WINDOW_NAME=1mb
 window=1000000
 window_name=1mb
 #PCs with maximum number of sQTLs for each condition - outputs an associative array ["condition" => "PC"]
-max_PCs=($(awk -F "\t" '{print $2}' /lustre/scratch123/hgi/projects/macromapsqtl/oe2/plots/plot_data/permutation_sqtl_num_1mb_max_pc_July_2021.txt))
-max_conds=($(awk -F "\t" '{print $1}' /lustre/scratch123/hgi/projects/macromapsqtl/oe2/plots/plot_data/permutation_sqtl_num_1mb_max_pc_July_2021.txt))
+max_PCs=($(awk -F "\t" '{print $2}' permutation_sqtl_num_1mb_max_pc_July_2021.txt))
+max_conds=($(awk -F "\t" '{print $1}' permutation_sqtl_num_1mb_max_pc_July_2021.txt))
 declare -A max_cond_PC; for i in "${!max_PCs[@]}"; do max_cond_PC["${max_conds[i]}"]="${max_PCs[i]}"; done;
 #To iterate over max_cond_PC in bash
 #for cond in "${!max_cond_PC[@]}"; do echo $cond; echo "${max_cond_PC[$cond]}"; echo "==="; done;
