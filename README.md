@@ -14,6 +14,7 @@ This code was used in the analysis of the MacroMap sQTL paper. Many of the compo
 	 
  5. `map_sql_permutation`: uses [QTLtools](https://qtltools.github.io/qtltools/pages/mode_cis_permutation.html) to map cis splicing QTLs (permutation pass). Phenotypes (introns) are grouped by gene ID. This consists of mapping a permuation pass sQTLs and FDR correction. This step is additionally used to determine how many principal components are used as covariates in the nominal pass. Briefly, the number of PCs that maximise the number of sGenes per condition is used. 
  6. `map_sqtl_nominal` uses [QTLtools](https://qtltools.github.io/qtltools/pages/mode_cis_nominal.html) to map cis splicing QTLs (nominal pass). To benefit from parallelisation available on large HPC clusters, the resulting summary statistics are divided into 100 chunks. These chunks were not merged during our analyses, but are merged and then split per chromosome in our published [data repository](ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/macromap_sqtl/FTP). 
+ 7. `sashimi` used to produce RNA-seq coverage plots. See [README](https://github.com/andersonlab/macromapsqtl/tree/main/sashimi).
 
 For any queries, please contact Omar El Garwany (oe2@sanger.ac.uk) or Carl A. Anderson (ca3@sanger.ac.uk)
 
