@@ -1,0 +1,42 @@
+#9 files
+screen -S macromap_coloc_1_Autoimmune_Inflamatory_disease_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "ALG AS CAST CELD MS PBC PSR RA SC" "harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_1_Autoimmune_Inflamatory_disease_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#13 files
+screen -S macromap_coloc_1_Autoimmune_Inflamatory_disease_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "AEZ ALGAST AST CD DIV FASC IBD OSTA OSTEA PALF SLE SSC UC" "myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_1_Autoimmune_Inflamatory_disease_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
+#4 files
+screen -S macromap_coloc_2_Heart_related_diseases_traits_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "CAD HEMO IS STR" "harmonized harmonized harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_2_Heart_related_diseases_traits_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#7 files
+screen -S macromap_coloc_2_Heart_related_diseases_traits_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "CATH DLM HDLC HYPL LDLC TCM TRG" "myformat myformat myformat myformat myformat myformat myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_2_Heart_related_diseases_traits_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
+#2 files
+screen -S macromap_coloc_3_Cancer_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "BRCA PRCA" "harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_3_Cancer_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#1 files
+screen -S macromap_coloc_3_Cancer_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "EDCA" "myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_3_Cancer_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
+#11 files
+screen -S macromap_coloc_4_Blood_related_diseases_traits_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "BSC EOSC ERYC GRAC LEYC LYMC MCH MONC NETC PLTC WHTC" "harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_4_Blood_related_diseases_traits_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#2 files
+screen -S macromap_coloc_4_Blood_related_diseases_traits_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "DBP SBP" "myformat myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_4_Blood_related_diseases_traits_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
+#2 files
+screen -S macromap_coloc_5_Neuro_related_diseases_traits_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "INTEL NEUR" "harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_5_Neuro_related_diseases_traits_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#14 files
+screen -S macromap_coloc_5_Neuro_related_diseases_traits_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "AINC ANXF ASQ AZ COGP DEPR DEPRA EDAT EPIL NERF NERV RISK TENS UPD" "myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_5_Neuro_related_diseases_traits_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
+#5 files
+screen -S macromap_coloc_6_Other_harmonized -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "ALB BH BMI COFF T1D" "harmonized harmonized harmonized harmonized harmonized" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_6_Other_harmonized" ; exec /usr/local/bin/bash' 
+#==
+#16 files
+screen -S macromap_coloc_6_Other_myformat -dm /usr/local/bin/bash -c 'eval "$(conda shell.bash hook)" ; conda activate gtex ; /usr/local/bin/bash /nfs/team152/oe2/sqtl/scripts/coloc_Jan_2022/macromap.snakewrapper.sh "BALD BIRW CHSIS CKD GLAM INS LBM MEP MICALB T2D UDQ VARV VATM VIT VITDL WHR" "myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat myformat" "/lustre/scratch123/hgi/projects/macromapsqtl/oe2/macromap_coloc_workdir/macromap_coloc_6_Other_myformat" ; exec /usr/local/bin/bash' 
+#==
+#========
