@@ -132,7 +132,7 @@ MASHR_JOB_LOGS_DIR="$JOB_LOGS_DIR"mashr/
 MASHR_SCRIPTS_DIR="$SCRIPTS_DIR"mashr/
 
 #WASP
-STAR_INDEX=/lustre/scratch119/realdata/mdt3/teams/gaffney/np12/MacroMap/Annotation/STAR_index/
+STAR_INDEX=/lustre/scratch126/humgen/teams/gaffney//np12/MacroMap/Annotation/STAR_index/
 WASP_SCRIPTS_DIR="$SCRIPTS_DIR"WASP/
 WASP_OUTPUT_DIR="$OUTPUT_DIR_SCRATCH119"bamwasp/
 WASP_JOB_LOGS_DIR="$JOB_LOGS_DIR"bamwasp/
