@@ -16,5 +16,5 @@ This code was used in the analysis of the MacroMap sQTL paper. Many of the compo
  6. `map_sqtl_nominal` uses [QTLtools](https://qtltools.github.io/qtltools/pages/mode_cis_nominal.html) to map cis splicing QTLs (nominal pass). To benefit from parallelisation available on large HPC clusters, the resulting summary statistics are divided into 100 chunks. These chunks were not merged during our analyses, but are merged and then split per chromosome in our published [data repository](ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/macromap_sqtl/FTP). 
  7. `sashimi` used to produce RNA-seq coverage plots. See [README](https://github.com/andersonlab/macromapsqtl/tree/main/sashimi).
 
-For any queries, please contact Omar El Garwany (oe2@sanger.ac.uk) or Carl A. Anderson (ca3@sanger.ac.uk)
+For any queries, please contact either Omar El Garwany (oe2@sanger.ac.uk) or Carl A. Anderson (ca3@sanger.ac.uk)
 
